@@ -1,0 +1,49 @@
+services:
+  keycloak-formazione:
+    image: quay.io/keycloak/keycloak:23.0.0
+    container_name: "keycloak-formazione-1"
+    environment:
+      # Imposta le credenziali di root
+      KEYCLOAK_ADMIN: "keycloak_usr"
+      KEYCLOAK_ADMIN_PASSWORD: "keycloak_pwd"
+      #   http://localhost:8080/health/ready
+      KC_HEALTH_ENABLED: "true"
+      #   http://localhost:8080/metrics
+      KC_METRICS_ENABLED: "true"
+    command:
+      - "start-dev"
+    networks:
+      formazione:
+    ports:
+      - "8080:8080"
+    volumes:
+      - "keycloak_data:/opt/keycloak/data"
+    deploy:
+      resources:
+        limits:
+          # Keycloak calcola dinamicamente la dimensione dell'heap
+          # in base alla memoria totale del container;
+          # Quindi, è necessario impostare il limite di memoria per il container.
+          # https://www.keycloak.org/server/containers
+          memory: 2G
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e \"GET /health/ready HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n\" >&3;grep \"HTTP/1.1 200 OK\" <&3" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  formazione:
+    name: formazione_network
+    driver: bridge
+    external: false
+
+volumes:
+  keycloak_data:
+    name: keycloak_formazione_data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./_keycloak/_internal
