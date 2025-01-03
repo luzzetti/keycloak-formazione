@@ -2,21 +2,33 @@ services:
   keycloak-formazione:
     image: quay.io/keycloak/keycloak:23.0.0
     container_name: "keycloak-formazione-1"
+    depends_on:
+      postgres-formazione:
+        condition: service_healthy
     environment:
       # Imposta le credenziali di root
       KEYCLOAK_ADMIN: "keycloak_usr"
       KEYCLOAK_ADMIN_PASSWORD: "keycloak_pwd"
-      #   http://localhost:8080/health/ready
+      # Abilita gli endpoint per il monitoring e le metriche
+      # http://localhost:8080/health/ready
+      # http://localhost:8080/metrics
       KC_HEALTH_ENABLED: "true"
-      #   http://localhost:8080/metrics
       KC_METRICS_ENABLED: "true"
       # Necessarie per PROD
-      # Fissa l'indirizzo usato da keycloak. Utilizzato nell'issuer e per evitare problemi di clustering
+      # Fissa l'indirizzo che verrà usato da keycloak nell'issuer e per evitare problemi di clustering
+      # Inoltre, imposta un diverso indirizzo per la console di amministrazione
       KC_HOSTNAME: "sso.luzzetti.dev"
-      # Imposta un diverso indirizzo per la console di amministrazione
       KC_HOSTNAME_ADMIN: "admin.sso.luzzetti.dev"
+      # Abilita il TLS
       KC_HTTPS_CERTIFICATE_FILE: "/opt/keycloak/data/my-ssl/luzzetti.dev.crt"
       KC_HTTPS_CERTIFICATE_KEY_FILE: "/opt/keycloak/data/my-ssl/luzzetti.dev.key"
+      # Abilita l'uso di un DB esterno
+      KC_DB: postgres
+      KC_DB_SCHEMA: public
+      KC_DB_URL_HOST: postgres-formazione
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: "postgres_usr"
+      KC_DB_PASSWORD: "postgres_pwd"
     command:
       - "start"
     networks:
@@ -36,8 +48,32 @@ services:
           memory: 2G
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8443;echo -e \"GET /health/ready HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n\" >&3;grep \"HTTP/1.1 200 OK\" <&3" ]
-      interval: 10s
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e \"GET /health/ready HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n\" >&3;grep \"HTTP/1.1 200 OK\" <&3" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-formazione:
+    image: postgres:17.2
+    container_name: "postgres-formazione-1"
+    environment:
+      POSTGRES_USER: "postgres_usr"
+      POSTGRES_PASSWORD: "postgres_pwd"
+      POSTGRES_MULTIPLE_DATABASES: "keycloak"
+    networks:
+      formazione:
+    ports:
+      - "5432:5432"
+    volumes:
+      - "postgres_data:/var/lib/postgresql/data/"
+      - "postgres_init:/docker-entrypoint-initdb.d/:ro"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d keycloak -U postgres_usr" ]
+      interval: 5s
       timeout: 5s
       retries: 5
 
@@ -55,3 +91,17 @@ volumes:
       type: none
       o: bind
       device: ./_keycloak/_internal
+  postgres_data:
+    name: postgres_formazione_data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./_postgres/_internal
+  postgres_init:
+    name: postgres_formazione_init
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./_postgres/sql
