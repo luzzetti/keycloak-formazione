@@ -29,15 +29,88 @@ services:
       KC_DB_URL_DATABASE: keycloak
       KC_DB_USERNAME: "postgres_usr"
       KC_DB_PASSWORD: "postgres_pwd"
+      # Abilita il clustering di infinispan tramite PING_JDBC
+      # Questa m'ha acciso
+      # https://github.com/ivangfr/keycloak-clustered
+      # https://stackoverflow.com/a/72773389
+      # Cambiare host.docker.internal con l'IP della macchina
+      KC_CACHE_CONFIG_FILE: "infinispan-jdbc-ping.xml"
+      JGROUPS_DISCOVERY_EXTERNAL_IP: host.docker.internal
     command:
       - "start"
     networks:
-      formazione:
+      formazione-1:
     ports:
       - "8080:8080"
       - "8443:8443"
+      - "7600:7600"
     volumes:
       - "keycloak_data:/opt/keycloak/data"
+      - "keycloak_config:/opt/keycloak/conf"
+    deploy:
+      resources:
+        limits:
+          # Keycloak calcola dinamicamente la dimensione dell'heap
+          # in base alla memoria totale del container;
+          # Quindi, è necessario impostare il limite di memoria per il container.
+          # https://www.keycloak.org/server/containers
+          memory: 2G
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e \"GET /health/ready HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n\" >&3;grep \"HTTP/1.1 200 OK\" <&3" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  keycloak-formazione-replica-2:
+    image: quay.io/keycloak/keycloak:23.0.0
+    container_name: "keycloak-formazione-2"
+    depends_on:
+      postgres-formazione:
+        condition: service_healthy
+    environment:
+      # Imposta le credenziali di root
+      KEYCLOAK_ADMIN: "keycloak_usr"
+      KEYCLOAK_ADMIN_PASSWORD: "keycloak_pwd"
+      # Abilita gli endpoint per il monitoring e le metriche
+      # http://localhost:8080/health/ready
+      # http://localhost:8080/metrics
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      # Necessarie per PROD
+      # Fissa l'indirizzo che verrà usato da keycloak nell'issuer e per evitare problemi di clustering
+      # Inoltre, imposta un diverso indirizzo per la console di amministrazione
+      KC_HOSTNAME: "sso.luzzetti.dev"
+      KC_HOSTNAME_ADMIN: "admin.sso.luzzetti.dev"
+      KC_HTTPS_PORT: "8444"
+      # Abilita il TLS
+      KC_HTTPS_CERTIFICATE_FILE: "/opt/keycloak/data/my-ssl/luzzetti.dev.crt"
+      KC_HTTPS_CERTIFICATE_KEY_FILE: "/opt/keycloak/data/my-ssl/luzzetti.dev.key"
+      # Abilita l'uso di un DB esterno
+      KC_DB: postgres
+      KC_DB_SCHEMA: public
+      KC_DB_URL_HOST: postgres-formazione
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: "postgres_usr"
+      KC_DB_PASSWORD: "postgres_pwd"
+      # Abilita il clustering di infinispan tramite PING_JDBC
+      # Questa m'ha acciso
+      # https://github.com/ivangfr/keycloak-clustered
+      # https://stackoverflow.com/a/72773389
+      # Cambiare host.docker.internal con l'IP della macchina
+      KC_CACHE_CONFIG_FILE: "infinispan-jdbc-ping.xml"
+      JGROUPS_DISCOVERY_EXTERNAL_IP: host.docker.internal
+    command:
+      - "start"
+    networks:
+      formazione-2:
+    ports:
+      - "8081:8080"
+      - "8444:8444"
+      - "7700:7700"
+    volumes:
+      - "keycloak_data_2:/opt/keycloak/data"
+      - "keycloak_config_2:/opt/keycloak/conf"
     deploy:
       resources:
         limits:
@@ -61,7 +134,8 @@ services:
       POSTGRES_PASSWORD: "postgres_pwd"
       POSTGRES_MULTIPLE_DATABASES: "keycloak"
     networks:
-      formazione:
+      - formazione-1
+      - formazione-2
     ports:
       - "5432:5432"
     volumes:
@@ -78,8 +152,12 @@ services:
       retries: 5
 
 networks:
-  formazione:
-    name: formazione_network
+  formazione-1:
+    name: formazione_1_network
+    driver: bridge
+    external: false
+  formazione-2:
+    name: formazione_2_network
     driver: bridge
     external: false
 
@@ -91,6 +169,27 @@ volumes:
       type: none
       o: bind
       device: ./_keycloak/_internal
+  keycloak_config:
+    name: keycloak_formazione_config
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./_keycloak/ispn_config
+  keycloak_data_2:
+    name: keycloak_formazione_data_2
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./_keycloak2/_internal
+  keycloak_config_2:
+    name: keycloak_formazione_config_2
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./_keycloak2/ispn_config
   postgres_data:
     name: postgres_formazione_data
     driver: local
