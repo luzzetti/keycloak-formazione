@@ -1,5 +1,34 @@
 services:
-  keycloak-formazione:
+
+  nginx-formazione:
+    image: nginx:1.27-alpine
+    container_name: "nginx-formazione"
+    depends_on:
+      keycloak-replica-1:
+        condition: service_healthy
+      keycloak-replica-2:
+        condition: service_healthy
+    networks:
+      - formazione-1
+      - formazione-2
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "nginx_conf:/etc/nginx/conf.d"
+      - "nginx_certs:/etc/nginx/certs"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -k --fail https://sso.luzzetti.dev || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  keycloak-replica-1:
     image: quay.io/keycloak/keycloak:23.0.0
     container_name: "keycloak-formazione-1"
     depends_on:
@@ -19,9 +48,14 @@ services:
       # Inoltre, imposta un diverso indirizzo per la console di amministrazione
       KC_HOSTNAME: "sso.luzzetti.dev"
       KC_HOSTNAME_ADMIN: "admin.sso.luzzetti.dev"
-      # Abilita il TLS
-      KC_HTTPS_CERTIFICATE_FILE: "/opt/keycloak/data/my-ssl/luzzetti.dev.crt"
-      KC_HTTPS_CERTIFICATE_KEY_FILE: "/opt/keycloak/data/my-ssl/luzzetti.dev.key"
+      # ALT1 - Abilita il TLS quando esposto direttamente
+      # KC_HTTPS_CERTIFICATE_FILE: "/opt/keycloak/data/my-ssl/luzzetti.dev.crt"
+      # KC_HTTPS_CERTIFICATE_KEY_FILE: "/opt/keycloak/data/my-ssl/luzzetti.dev.key"
+      # KC_HTTPS_PORT: "8443"
+      # ALT-2 - Abilita http quando dietro un proxy con TLS termination
+      KC_PROXY: edge
+      KC_HTTP_ENABLED: true
+      KC_HOSTNAME_STRICT: false
       # Abilita l'uso di un DB esterno
       KC_DB: postgres
       KC_DB_SCHEMA: public
@@ -41,8 +75,6 @@ services:
     networks:
       formazione-1:
     ports:
-      - "8080:8080"
-      - "8443:8443"
       - "7600:7600"
     volumes:
       - "keycloak_data:/opt/keycloak/data"
@@ -62,7 +94,7 @@ services:
       timeout: 5s
       retries: 5
 
-  keycloak-formazione-replica-2:
+  keycloak-replica-2:
     image: quay.io/keycloak/keycloak:23.0.0
     container_name: "keycloak-formazione-2"
     depends_on:
@@ -82,10 +114,14 @@ services:
       # Inoltre, imposta un diverso indirizzo per la console di amministrazione
       KC_HOSTNAME: "sso.luzzetti.dev"
       KC_HOSTNAME_ADMIN: "admin.sso.luzzetti.dev"
-      KC_HTTPS_PORT: "8444"
-      # Abilita il TLS
-      KC_HTTPS_CERTIFICATE_FILE: "/opt/keycloak/data/my-ssl/luzzetti.dev.crt"
-      KC_HTTPS_CERTIFICATE_KEY_FILE: "/opt/keycloak/data/my-ssl/luzzetti.dev.key"
+      # ALT1 - Abilita il TLS quando esposto direttamente
+      # KC_HTTPS_CERTIFICATE_FILE: "/opt/keycloak/data/my-ssl/luzzetti.dev.crt"
+      # KC_HTTPS_CERTIFICATE_KEY_FILE: "/opt/keycloak/data/my-ssl/luzzetti.dev.key"
+      # KC_HTTPS_PORT: "8443"
+      # ALT-2 - Abilita http quando dietro un proxy con TLS termination
+      KC_PROXY: edge
+      KC_HTTP_ENABLED: true
+      KC_HOSTNAME_STRICT: false
       # Abilita l'uso di un DB esterno
       KC_DB: postgres
       KC_DB_SCHEMA: public
@@ -105,8 +141,6 @@ services:
     networks:
       formazione-2:
     ports:
-      - "8081:8080"
-      - "8444:8444"
       - "7700:7700"
     volumes:
       - "keycloak_data_2:/opt/keycloak/data"
@@ -163,6 +197,23 @@ networks:
     external: false
 
 volumes:
+
+  nginx_conf:
+    name: nginx_formazione_config
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./_nginx/conf
+
+  nginx_certs:
+    name: nginx_formazione_certs
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./_nginx/certs
+
   keycloak_data:
     name: keycloak_formazione_data
     driver: local
@@ -170,6 +221,7 @@ volumes:
       type: none
       o: bind
       device: ./_keycloak/_internal
+
   keycloak_config:
     name: keycloak_formazione_config
     driver: local
@@ -177,6 +229,7 @@ volumes:
       type: none
       o: bind
       device: ./_keycloak/ispn_config
+
   keycloak_data_2:
     name: keycloak_formazione_data_2
     driver: local
@@ -184,6 +237,7 @@ volumes:
       type: none
       o: bind
       device: ./_keycloak2/_internal
+
   keycloak_config_2:
     name: keycloak_formazione_config_2
     driver: local
@@ -191,6 +245,7 @@ volumes:
       type: none
       o: bind
       device: ./_keycloak2/ispn_config
+
   postgres_data:
     name: postgres_formazione_data
     driver: local
@@ -198,6 +253,7 @@ volumes:
       type: none
       o: bind
       device: ./_postgres/_internal
+
   postgres_init:
     name: postgres_formazione_init
     driver: local
