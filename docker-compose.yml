@@ -1,5 +1,26 @@
 services:
 
+  keycloak-config-cli-formazione:
+    image: adorsys/keycloak-config-cli:6.2.1-23
+    container_name: "keycloak-config-cli-formazione"
+    depends_on:
+      nginx-formazione:
+        condition: service_healthy
+    environment:
+      KEYCLOAK_URL: http://keycloak-replica-1:8080/
+      KEYCLOAK_USER: "keycloak_usr"
+      KEYCLOAK_PASSWORD: "keycloak_pwd"
+      KEYCLOAK_AVAILABILITYCHECK_ENABLED: true
+      KEYCLOAK_AVAILABILITYCHECK_TIMEOUT: 120s
+      KEYCLOAK_SSLVERIFY: false
+      IMPORT_FILES_LOCATIONS: '/config/*'
+      LOGGING_LEVEL_ROOT: INFO
+    networks:
+      formazione-1:
+    volumes:
+      - "keycloak_config_cli_conf:/config"
+
+
   nginx-formazione:
     image: nginx:1.27-alpine
     container_name: "nginx-formazione"
@@ -197,6 +218,14 @@ networks:
     external: false
 
 volumes:
+
+  keycloak_config_cli_conf:
+    name: keycloak_config_cli_conf
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./_keycloak_config_cli/conf
 
   nginx_conf:
     name: nginx_formazione_config
