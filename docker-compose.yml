@@ -67,8 +67,8 @@ services:
       # Necessarie per PROD
       # Fissa l'indirizzo che verrà usato da keycloak nell'issuer e per evitare problemi di clustering
       # Inoltre, imposta un diverso indirizzo per la console di amministrazione
-      KC_HOSTNAME: "sso.luzzetti.dev"
-      KC_HOSTNAME_ADMIN: "admin.sso.luzzetti.dev"
+      KC_HOSTNAME_URL: "https://sso.luzzetti.dev"
+      KC_HOSTNAME_ADMIN_URL: "http://127.0.0.1:8080"
       # ALT1 - Abilita il TLS quando esposto direttamente
       # KC_HTTPS_CERTIFICATE_FILE: "/opt/keycloak/data/my-ssl/luzzetti.dev.crt"
       # KC_HTTPS_CERTIFICATE_KEY_FILE: "/opt/keycloak/data/my-ssl/luzzetti.dev.key"
@@ -95,7 +95,10 @@ services:
       - "start"
     networks:
       formazione-1:
+    # la 7600 viene utilizzata solo per il clustering infinispan
+    # la 8080 viene utilizzata per poter raggiungere la console da una rete sicura 'interna'
     ports:
+      - "8080:8080"
       - "7600:7600"
     volumes:
       - "keycloak_data:/opt/keycloak/data"
@@ -133,8 +136,8 @@ services:
       # Necessarie per PROD
       # Fissa l'indirizzo che verrà usato da keycloak nell'issuer e per evitare problemi di clustering
       # Inoltre, imposta un diverso indirizzo per la console di amministrazione
-      KC_HOSTNAME: "sso.luzzetti.dev"
-      KC_HOSTNAME_ADMIN: "admin.sso.luzzetti.dev"
+      KC_HOSTNAME_URL: "https://sso.luzzetti.dev"
+      KC_HOSTNAME_ADMIN_URL: "http://127.0.0.1:8080"
       # ALT1 - Abilita il TLS quando esposto direttamente
       # KC_HTTPS_CERTIFICATE_FILE: "/opt/keycloak/data/my-ssl/luzzetti.dev.crt"
       # KC_HTTPS_CERTIFICATE_KEY_FILE: "/opt/keycloak/data/my-ssl/luzzetti.dev.key"
@@ -162,6 +165,7 @@ services:
     networks:
       formazione-2:
     ports:
+      - "8081:8080"
       - "7700:7700"
     volumes:
       - "keycloak_data_2:/opt/keycloak/data"
