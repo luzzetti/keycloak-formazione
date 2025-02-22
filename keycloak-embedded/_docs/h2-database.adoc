@@ -1,0 +1,9 @@
+= Ndo sta il DB?
+
+Allora...calcolando che questo kc embedded è una specie di Frankenstain's monster, il db h2 (usato da keycloak appunto), non è quello configurato nelle application.yml
+
+Per andare a modificare le impostazioni di quel db, dovete andare dentro al file keycloak-server.json
+
+Se volete piallarlo, potete tranquillamente cancellare la directory `/_h2` e riavviare il server.
+
+(Se trovate un modo più semplice di configurare tutte quelle properties...ve ne sarei grato)

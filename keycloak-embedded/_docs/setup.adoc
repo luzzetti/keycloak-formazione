@@ -1,0 +1,8 @@
+= Gestire questa folder come Maven Project
+
+1. Entrare nella cartella keycloak-embedded
+2. In intellij, prefere shift-shift per aprire la finestra di ricerca globale
+3. cercare 'add maven project'
+4. Non ricordo più cosa avevo cliccato, ma una delle due
+
+https://stackoverflow.com/questions/31099619/how-to-mark-import-subfolders-as-maven-projects-in-intellij[Altre info forse utili]
