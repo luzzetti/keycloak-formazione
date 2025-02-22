@@ -12,5 +12,5 @@ spring:
 keycloak:
   server:
     contextPath: /auth
-    username: bael-admin
-    password: password
+    username: keycloak_usr
+    password: keycloak_pwd
