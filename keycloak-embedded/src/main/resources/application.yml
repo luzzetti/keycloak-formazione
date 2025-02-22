@@ -1,0 +1,16 @@
+server:
+  port: 8083
+
+spring:
+
+  application:
+    name: keycloak-embedded
+
+  jpa:
+    defer-datasource-initialization: true
+
+keycloak:
+  server:
+    contextPath: /auth
+    username: bael-admin
+    password: password
