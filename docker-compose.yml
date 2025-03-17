@@ -191,10 +191,9 @@ services:
     environment:
       POSTGRES_USER: "postgres_usr"
       POSTGRES_PASSWORD: "postgres_pwd"
-      POSTGRES_MULTIPLE_DATABASES: "keycloak"
+      POSTGRES_MULTIPLE_DATABASES: "keycloak,test,christian,ciao"
     networks:
       - formazione-1
-      - formazione-2
     ports:
       - "5432:5432"
     volumes:
@@ -216,6 +215,7 @@ networks:
     name: formazione_1_network
     driver: bridge
     external: false
+
   formazione-2:
     name: formazione_2_network
     driver: bridge

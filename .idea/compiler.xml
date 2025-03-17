@@ -9,7 +9,6 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/hibernate/orm/hibernate-jpamodelgen/6.6.8.Final/hibernate-jpamodelgen-6.6.8.Final.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/hibernate/orm/hibernate-core/6.6.8.Final/hibernate-core-6.6.8.Final.jar" />
           <entry name="$MAVEN_REPOSITORY$/jakarta/persistence/jakarta.persistence-api/3.1.0/jakarta.persistence-api-3.1.0.jar" />

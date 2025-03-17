@@ -1,0 +1,196 @@
+.login-pf {
+  background: white;
+}
+
+.login-pf-page {
+  display: flex;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+}
+
+.kc-custom-bg {
+  width: 65%;
+}
+
+.kc-custom-bg-image {
+  width: 100%;
+  height: 100%;
+  background: url("../img/login.jpg") no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+#kc-header {
+  width: 35%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-family: "Manrope", serif;
+}
+div.kc-logo-container {
+  height: 120px;
+  width: 100%;
+  margin: 40px 0 10px 0;
+}
+
+div.kc-logo-text {
+  background-image: url(../img/pmp-logo.svg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  height: 100%;
+  width: 50%;
+  margin: auto;
+}
+
+.card-pf {
+  width: 380px;
+  padding: 0 !important;
+  background: none;
+  border: none;
+  box-shadow: none;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pf-c-form__label-text {
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+#kc-form-login {
+  text-align: start;
+}
+
+.login-pf-header {
+  display: none !important;
+}
+
+.pf-c-form-control {
+  height: 48px !important;
+  vertical-align: middle;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  border-bottom-color: #f0f0f0;
+}
+.pf-c-form-control:focus {
+  outline: none;
+  border: 2px solid #ffeb3b;
+}
+
+#pmp-register {
+  color: white;
+  background: #289e9f;
+  margin-bottom: 30px;
+  margin-top: 20px;
+}
+
+#pmp-register:hover {
+  color: #289e9f;
+  background: white;
+  border: 3px solid #289e9f !important;
+}
+
+#pmp-password-remainder {
+  width: 130px;
+  font-size: 12px;
+  background: none;
+  text-align: left;
+  text-decoration: underline;
+  padding: 0;
+}
+
+#pmp-password-remainder:hover {
+  opacity: 0.5;
+}
+
+.pf-c-button.pf-m-primary,
+.kc-social-item,
+#pmp-register {
+  height: 48px;
+  font-weight: bolder;
+}
+
+.pf-c-button.pf-m-primary {
+  color: #333333;
+  background: #ffeb3b;
+}
+
+.pf-c-button.pf-m-primary:hover {
+  color: #333333;
+  background: #ffffff;
+  border: 3px solid #ffeb3b;
+}
+
+.kc-social-item {
+  color: #289e9f !important;
+  border: 3px solid #289e9f;
+  background: white !important;
+  margin-bottom: 20px;
+}
+
+.kc-social-item:hover {
+  color: white !important;
+  background: #289e9f !important;
+}
+
+.required {
+  color: var(--pf-global--danger-color--200);
+}
+
+.pf-c-form-control[aria-invalid="true"] {
+  border: 2px solid red;
+}
+
+#kc-social-providers > h4 {
+  font-size: 12px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.kc-social-provider-name {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.kc-social-item:after {
+  border: unset;
+}
+
+@media only screen and (max-width: 1200px) {
+  .kc-custom-bg {
+    display: none;
+  }
+
+  #kc-header {
+    width: 100%;
+    margin-bottom: 0;
+    overflow-x: hidden;
+    display: block;
+  }
+
+  .kc-logo-container {
+    height: 45px !important;
+    margin: 10px 0 20px 0 !important;
+  }
+
+  #pmp-register {
+    margin-top: 10px !important;
+  }
+
+  #pmp-register,
+  #pmp-password-remainder {
+    margin-bottom: 5px !important;
+  }
+
+  .card-pf {
+    width: 330px;
+  }
+}
