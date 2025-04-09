@@ -191,7 +191,7 @@ services:
     environment:
       POSTGRES_USER: "postgres_usr"
       POSTGRES_PASSWORD: "postgres_pwd"
-      POSTGRES_MULTIPLE_DATABASES: "keycloak,test,christian,ciao"
+      POSTGRES_MULTIPLE_DATABASES: "keycloak"
     networks:
       - formazione-1
       - formazione-2
