@@ -194,6 +194,7 @@ services:
       POSTGRES_MULTIPLE_DATABASES: "keycloak,test,christian,ciao"
     networks:
       - formazione-1
+      - formazione-2
     ports:
       - "5432:5432"
     volumes:
